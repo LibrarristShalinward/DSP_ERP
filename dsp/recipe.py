@@ -97,7 +97,7 @@ class Recipe:
         )
     
     def __repr__(self):
-        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time}/min-> {self.amount2str(self.results)}】"
+        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time / 60.}s-> {self.amount2str(self.results)}】"
     
     def __hash__(self):
         return self.id
@@ -121,4 +121,18 @@ dsp_recipes = {
         ], 
         key = lambda it: it.id
     )
+}
+
+dsp_recipes_basic = {
+    rid: rcp
+    for rid, rcp in dsp_recipes.items()
+    if
+        set(rcp.items.keys()) != set(rcp.results.keys()) and
+        (
+            rid <= 160 or
+            (
+                rid >= 11000 and
+                rid <= 11031
+            )
+        )
 }
