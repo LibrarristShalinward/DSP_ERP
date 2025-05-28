@@ -1,8 +1,6 @@
+from .policy.recipe import RecipePolicy
 from dsp import *
 from functools import cached_property
-
-from dsp.items import Item
-from .policy.recipe import RecipePolicy
 
 
 
@@ -64,34 +62,6 @@ class ScalePlan:
             it: its for it, its in basic_dict.items()
             if its
         }
-    
-    @staticmethod
-    def cal_rcp_scale(rcp: Recipe, prod: Item, ps: float): 
-        """根据产物产量计算配方所需生产力
-
-        Args:
-            rcp (Recipe): 配方
-            prod (Item): 目标产物
-            ps (float): 目标产量(单位/min)
-
-        Returns:
-            float: 生产力(单位为一台基础设施的生产力)
-        """
-        return ps * rcp.time / rcp.results[prod] / 3600.
-    @staticmethod
-    def cal_item_scale(item: Item, rcp: Recipe, rs: float): 
-        """根据生产力计算配方中原料的需求产量
-
-        Args:
-            item (Item): 目标原料
-            rcp (Recipe): 配方
-            rs (float): 生产力(单位为一台基础设施的生产力)
-
-        Returns:
-            float: 原料需求产量(单位/min)
-        """
-        return rs * 3600. * rcp.items[item] / rcp.time
-    # endregion
 
     # region 中间函数
     def get_all_recipes(self, 
@@ -135,7 +105,7 @@ class ScalePlan:
         """{产物: 产量(单位/min), ...}, {配方: 生产力(单位为一台基础设施的生产力), ...}"""
         item_scale = self.tar.copy()
         rcp_scale = {
-            self.rcp_graph[item]: self.cal_rcp_scale(self.rcp_graph[item], item, s)
+            self.rcp_graph[item]: self.rcp_graph[item].result2prod(item, s)
             for item, s in item_scale.items()
         }
         
@@ -146,14 +116,13 @@ class ScalePlan:
 
         def _update_rcp_scale_from_item(item: Item): 
             ps: float = sum([
-                self.cal_item_scale(
+                self.rcp_graph[it].prod2require(
                     item, 
-                    self.rcp_graph[it], 
                     _get_rcp_scale_from_item(it)
                 ) for it in self.reliances[item]
             ])
             item_scale[item] = ps
-            rcp_scale[self.rcp_graph[item]] = self.cal_rcp_scale(self.rcp_graph[item], item, ps)
+            rcp_scale[self.rcp_graph[item]] = self.rcp_graph[item].result2prod(item, ps)
         
         for it in self.reliances.keys():
             _get_rcp_scale_from_item(it)
