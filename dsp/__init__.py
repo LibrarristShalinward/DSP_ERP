@@ -7,7 +7,7 @@ with open(
             dsp_folder, 
             r"resources/FractionateEverything.json"
         ), 
-        "r"
+        "r", encoding = "utf-8"
     ) as f: 
     factory = json.load(f)
 
