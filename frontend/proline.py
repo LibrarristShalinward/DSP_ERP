@@ -23,7 +23,10 @@ class SubWindowCfg(TypedDict):
 
 class ProdectionLineWindow: 
     tag: str = "proline_window"
-    def __init__(self, ) -> None: 
+    def __init__(self, 
+                init_items: set[Item] = set(dsp_items.values()), 
+                init_recipes: set[Recipe] = set(dsp_recipes.values())
+            ) -> None: 
         with open(
                 Path(__file__).parent / "ui.json", 
                 "r", 
@@ -74,6 +77,7 @@ class ProdectionLineWindow:
                         )
                         for item, (r, c) in self.item_pos.items()
                     }
+        self.focus_items, self.focus_recipes = init_items, init_recipes
         self.show_subfig(0)()
         # 获取当前窗口可显示区域的大小和左上角坐标
     
@@ -96,5 +100,5 @@ class ProdectionLineWindow:
     def show_subfig(self, sub_idx: int): 
         def setter(*_, **__): 
             for item, button in self.dpg_item_buttons.items(): 
-                button.set_visible(item in self.sub_include_items[sub_idx])
+                button.set_visible(item in self.focus_items and item in self.sub_include_items[sub_idx])
         return setter
