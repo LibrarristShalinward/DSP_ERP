@@ -1,4 +1,5 @@
 from .components import *
+from .layout import *
 from dsp import *
 from pathlib import Path
 from typing import TypedDict
@@ -9,6 +10,12 @@ class ScaleCfg(TypedDict):
     row: int
     col: int
     col_idx_start: int
+    inner_vcon_cap: int
+    inner_hcon_cap: int
+    outer_lcon_cap: int
+    outer_rcon_cap: int
+    outer_tcon_cap: int
+
 
 class AllocCfg(TypedDict): 
     node: list[tuple[int, tuple[int, int]]]
@@ -33,11 +40,18 @@ class ProdectionLineWindow:
                 encoding = "utf-8"
             ) as f: 
             self.cfg: list[SubWindowCfg] = json.load(f)
-        self.row = max(
-            cfg["scale"]["row"] for cfg in self.cfg
-        )
-        self.col = max(
-            cfg["scale"]["col"] for cfg in self.cfg
+        self.layout = ProLineLayout(
+            max(cfg["scale"]["row"] for cfg in self.cfg), 
+            max(cfg["scale"]["col"] for cfg in self.cfg), 
+            (
+                max(cfg["scale"]["inner_vcon_cap"] for cfg in self.cfg), 
+                max(cfg["scale"]["inner_hcon_cap"] for cfg in self.cfg), 
+            ), 
+            (
+                max(cfg["scale"]["outer_lcon_cap"] for cfg in self.cfg), 
+                max(cfg["scale"]["outer_rcon_cap"] for cfg in self.cfg), 
+                max(cfg["scale"]["outer_tcon_cap"] for cfg in self.cfg)
+            )
         )
         self.sub_tags = [
             cfg["tag"] for cfg in self.cfg
@@ -56,8 +70,6 @@ class ProdectionLineWindow:
                 set(i.items()) for i in self.items
             ])
         }
-        self.hg, self.vg = 50., 50.
-        self.fig_size = self.hg * self.col, self.vg * self.row
         with dpg.window(label = "Prodection Line", tag = self.tag): 
             with dpg.menu_bar(): 
                 with dpg.menu(label = "产线"): 
@@ -71,8 +83,8 @@ class ProdectionLineWindow:
                     self.dpg_item_buttons = {
                         item: DPGItemButton(
                             item, 
-                            ((c + .5) * self.hg, (r + .5) * self.vg), 
-                            30., 
+                            self.layout.icon_pos[r, c], 
+                            self.layout.cfg.icon_size, 
                             visible = False
                         )
                         for item, (r, c) in self.item_pos.items()
@@ -86,13 +98,13 @@ class ProdectionLineWindow:
         vgap, hgap = 10., 10.
         assert actual_size[0] > hgap * 2 and actual_size[1] > vgap * 2, "窗口太小"
         scale = min(
-            (actual_size[0] - hgap * 2) / self.fig_size[0], 
-            (actual_size[1] - vgap * 2) / self.fig_size[1]
+            (actual_size[0] - hgap * 2) / self.layout.fig_size[0], 
+            (actual_size[1] - vgap * 2) / self.layout.fig_size[1]
         )
         dpg.apply_transform(
             self.base_node, 
             dpg.create_translation_matrix((
-                (actual_size[0] - self.fig_size[0] * scale) / 2, 
+                (actual_size[0] - self.layout.fig_size[0] * scale) / 2, 
                 vgap
             )) * 
             dpg.create_scale_matrix((scale, scale))
