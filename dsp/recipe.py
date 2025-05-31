@@ -97,7 +97,7 @@ class Recipe:
         )
     
     def __repr__(self):
-        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time}/min-> {self.amount2str(self.results)}】"
+        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time / 60.}s-> {self.amount2str(self.results)}】"
     
     def __hash__(self):
         return self.id
