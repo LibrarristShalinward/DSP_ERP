@@ -49,8 +49,8 @@ class Recipe:
                 id: int, 
                 rtype: RecipeType, 
                 name: str, 
-                items: dict[Item, int], 
-                results: dict[Item, int], 
+                items: dict[Item, float], 
+                results: dict[Item, float], 
                 time: float, 
                 icon: str
             ):
@@ -62,32 +62,34 @@ class Recipe:
         self.time = time
         self.icon = icon
     
-    @classmethod
-    def from_dict(self, dt: dict[str, str]): 
+    @staticmethod
+    def from_dict(dt: dict[str, str]): 
         return Recipe(
             int(dt["ID"]), 
             RecipeType(int(dt["Type"])), 
             dt["Name"], 
-            dict(
-                zip(
+            {
+                i: float(j)
+                for i, j in zip(
                     [dsp_items[iid] for iid in dt["Items"]], 
                     dt["ItemCounts"]
                 )
-            ), 
-            dict(
-                zip(
+            }, 
+            {
+                i: float(j)
+                for i, j in zip(
                     [dsp_items[iid] for iid in dt["Results"]], 
                     dt["ResultCounts"]
                 )
-            ), 
-            dt["TimeSpend"], 
+            }, 
+            float(dt["TimeSpend"]), 
             dt["IconName"]
         )
     
     @staticmethod
-    def amount2str(amt: dict[Item, int]): 
+    def amount2str(amt: dict[Item, float]): 
         return " + ".join(
-            f"{k.name}x{v}" for k, v in amt.items()
+            f"{k.name}x{int(v) if v >= 1. else "%.3f" %v}" for k, v in amt.items()
         )
     
     @property
@@ -97,7 +99,7 @@ class Recipe:
         )
     
     def __repr__(self):
-        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time}/min-> {self.amount2str(self.results)}】"
+        return f"{self.name}(#{self.id})【{self.amount2str(self.items)} -{self.rtype}x{self.time / 60.}s-> {self.amount2str(self.results)}】"
     
     def __hash__(self):
         return self.id
@@ -113,6 +115,43 @@ class Recipe:
         return not self.all_objs_satisfies(
             lambda i: not cri(i)
         )
+    
+    # region 计算函数
+    def result2prod(self, 
+                result: Item, scale: float
+            ) -> float: 
+        """根据产物产量计算配方所需生产力
+
+        Args:
+            result (Item): 目标产物
+            scale (float): 目标产量(单位/min)
+
+        Returns:
+            float: 生产力(单位为一台基础设施的生产力)
+        """
+        if result in self.results.keys(): 
+            rs = self.results[result]
+            if result in self.items.keys(): 
+                rs -= self.items[result]
+        else: 
+            assert False, f"【{result}】不是合成路线的产物"
+        return scale * self.time / rs / 3600.
+    
+    def prod2require(self, 
+                raw: Item, scale: float
+            ) -> float: 
+        """根据生产力计算配方中原料的需求产量
+
+        Args:
+            raw (Item): 目标原料
+            scale (float): 生产力(单位为一台基础设施的生产力)
+
+        Returns:
+            float: 原料需求产量(单位/min)
+        """
+        return scale * 3600. * self.items[raw] / self.time
+    
+    # endregion
 
 dsp_recipes = {
     rc.id: rc for rc in sorted(
@@ -121,4 +160,18 @@ dsp_recipes = {
         ], 
         key = lambda it: it.id
     )
+}
+
+dsp_recipes_basic = {
+    rid: rcp
+    for rid, rcp in dsp_recipes.items()
+    if
+        set(rcp.items.keys()) != set(rcp.results.keys()) and
+        (
+            rid <= 160 or
+            (
+                rid >= 11000 and
+                rid <= 11031
+            )
+        )
 }

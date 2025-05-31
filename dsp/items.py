@@ -46,8 +46,8 @@ class Item:
         self.idx = idx
         self.icon = icon
 
-    @classmethod
-    def from_dict(self, dt: dict[str, str]): 
+    @staticmethod
+    def from_dict(dt: dict[str, str]): 
         gidxn = int(dt["GridIndex"])
         return Item(
             int(dt["ID"]), 
@@ -66,10 +66,10 @@ class Item:
     def __hash__(self):
         return self.id
 
-__all_items = sorted(
+_all_items = sorted(
     [
         Item.from_dict(i) for i in factory["items"]
     ], 
     key = lambda it: it.id
 )
-dsp_items = {it.id: it for it in __all_items} | {it.name: it for it in __all_items}
+dsp_items = {it.id: it for it in _all_items} | {it.name: it for it in _all_items}
