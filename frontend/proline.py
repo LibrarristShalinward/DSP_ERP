@@ -18,6 +18,7 @@ class ScaleCfg(TypedDict):
 class SubWindowCfg(TypedDict): 
     tag: str
     node: list[int]
+    recipe: list[int]
 
 class WindowCfg(TypedDict): 
     scale: ScaleCfg
@@ -59,6 +60,9 @@ class ProdectionLineWindow:
         self.sub_include_items = [
             {dsp_items[iid] for iid in cfg["node"]} for cfg in self.cfg["layers"]
         ]
+        self.sub_include_rcps = [
+            {dsp_recipes[rid] for rid in cfg["recipe"]} for cfg in self.cfg["layers"]
+        ]
         self.items = {
             dsp_items[iid]: rc for iid, rc in self.cfg["nodes"]
         }
@@ -74,7 +78,7 @@ class ProdectionLineWindow:
                 with  dpg.draw_node() as self.recipe_node: 
                     self.dpg_recipes = {
                         dsp_recipes[rid]: DPGRecipe(
-                            xys, 1
+                            xys, 1, visible = False
                         ) for rid, xys in self.cfg["recipes"]
                     }
                 with dpg.draw_node() as self.item_node: 
@@ -112,6 +116,12 @@ class ProdectionLineWindow:
     
     def show_subfig(self, sub_idx: int): 
         def setter(*_, **__): 
+            recipes = self.focus_recipes & self.sub_include_rcps[sub_idx]
+            itms = self.focus_items & self.sub_include_items[sub_idx] & set.union(*[
+                set(rcp.items.keys()) | set(rcp.results.keys()) for rcp in recipes
+            ])
             for item, button in self.dpg_item_buttons.items(): 
-                button.set_visible(item in self.focus_items and item in self.sub_include_items[sub_idx])
+                button.set_visible(item in itms)
+            for recipe, cons in self.dpg_recipes.items(): 
+                cons.set_visible(recipe in recipes)
         return setter

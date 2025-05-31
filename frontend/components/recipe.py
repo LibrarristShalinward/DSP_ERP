@@ -28,9 +28,13 @@ class DPGRecipe:
             xys: list[tuple[list[float], list[float]]], 
             width: int, 
             parent: int | str = 0, 
+            visible: bool = True, 
         ) -> None: 
-        with dpg.draw_node(parent = parent) as self.tag: 
+        with dpg.draw_node(parent = parent, show = visible) as self.tag: 
             self.connections = [
                 DPGConnection(xy, width, self.tag)
                 for xy in xys
             ]
+    
+    def set_visible(self, visible: bool): 
+        dpg.configure_item(self.tag, show = visible)
