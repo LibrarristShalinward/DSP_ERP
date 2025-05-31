@@ -15,7 +15,6 @@ class ScaleCfg(TypedDict):
     outer_rcon_cap: int
     outer_tcon_cap: int
 
-
 class SubWindowCfg(TypedDict): 
     tag: str
     node: list[int]
@@ -23,6 +22,7 @@ class SubWindowCfg(TypedDict):
 class WindowCfg(TypedDict): 
     scale: ScaleCfg
     nodes: list[tuple[int, tuple[int, int]]]
+    recipes: list[tuple[int, list[tuple[list[float], list[float]]]]]
     layers: list[SubWindowCfg]
 
 
@@ -59,7 +59,7 @@ class ProdectionLineWindow:
         self.sub_include_items = [
             {dsp_items[iid] for iid in cfg["node"]} for cfg in self.cfg["layers"]
         ]
-        self.item_pos: dict[Item, tuple[int, int]] = {
+        self.items = {
             dsp_items[iid]: rc for iid, rc in self.cfg["nodes"]
         }
         with dpg.window(label = "Prodection Line", tag = self.tag): 
@@ -71,6 +71,12 @@ class ProdectionLineWindow:
                             callback = self.show_subfig(i)
                         )
             with dpg.draw_node() as self.base_node: 
+                with  dpg.draw_node() as self.recipe_node: 
+                    self.dpg_recipes = {
+                        dsp_recipes[rid]: DPGRecipe(
+                            xys, 1
+                        ) for rid, xys in self.cfg["recipes"]
+                    }
                 with dpg.draw_node() as self.item_node: 
                     self.dpg_item_buttons = {
                         item: DPGItemButton(
@@ -79,7 +85,7 @@ class ProdectionLineWindow:
                             self.layout.cfg.icon_size, 
                             visible = False
                         )
-                        for item, (r, c) in self.item_pos.items()
+                        for item, (r, c) in self.items.items()
                     }
         self.focus_items, self.focus_recipes = init_items, init_recipes
         self.show_subfig(0)()
