@@ -16,13 +16,14 @@ class ScaleCfg(TypedDict):
     outer_tcon_cap: int
 
 
-class AllocCfg(TypedDict): 
-    node: list[tuple[int, tuple[int, int]]]
-
 class SubWindowCfg(TypedDict): 
     tag: str
+    node: list[int]
+
+class WindowCfg(TypedDict): 
     scale: ScaleCfg
-    alloc: AllocCfg
+    nodes: list[tuple[int, tuple[int, int]]]
+    layers: list[SubWindowCfg]
 
 
 
@@ -38,36 +39,28 @@ class ProdectionLineWindow:
                 "r", 
                 encoding = "utf-8"
             ) as f: 
-            self.cfg: list[SubWindowCfg] = json.load(f)
+            self.cfg: WindowCfg = json.load(f)
         self.layout = ProLineLayout(
-            max(cfg["scale"]["row"] for cfg in self.cfg), 
-            max(cfg["scale"]["col"] for cfg in self.cfg), 
+            self.cfg["scale"]["row"], 
+            self.cfg["scale"]["col"], 
             (
-                max(cfg["scale"]["inner_vcon_cap"] for cfg in self.cfg), 
-                max(cfg["scale"]["inner_hcon_cap"] for cfg in self.cfg), 
+                self.cfg["scale"]["inner_vcon_cap"], 
+                self.cfg["scale"]["inner_hcon_cap"], 
             ), 
             (
-                max(cfg["scale"]["outer_lcon_cap"] for cfg in self.cfg), 
-                max(cfg["scale"]["outer_rcon_cap"] for cfg in self.cfg), 
-                max(cfg["scale"]["outer_tcon_cap"] for cfg in self.cfg)
+                self.cfg["scale"]["outer_lcon_cap"], 
+                self.cfg["scale"]["outer_rcon_cap"], 
+                self.cfg["scale"]["outer_tcon_cap"]
             )
         )
         self.sub_tags = [
-            cfg["tag"] for cfg in self.cfg
+            cfg["tag"] for cfg in self.cfg["layers"]
         ]
         self.sub_include_items = [
-            {dsp_items[iid] for iid, _ in cfg["alloc"]["node"]} for cfg in self.cfg
-        ]
-        self.items = [
-            {
-                iid: (r, c) for iid, (r, c) in cfg["alloc"]["node"]
-            } for cfg in self.cfg
+            {dsp_items[iid] for iid in cfg["node"]} for cfg in self.cfg["layers"]
         ]
         self.item_pos: dict[Item, tuple[int, int]] = {
-            dsp_items[iid]: rc for iid, rc in
-            set.union(*[
-                set(i.items()) for i in self.items
-            ])
+            dsp_items[iid]: rc for iid, rc in self.cfg["nodes"]
         }
         with dpg.window(label = "Prodection Line", tag = self.tag): 
             with dpg.menu_bar(): 
