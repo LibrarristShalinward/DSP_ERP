@@ -24,6 +24,7 @@ class WindowCfg(TypedDict):
     scale: ScaleCfg
     nodes: list[tuple[int, tuple[int, int]]]
     recipes: list[tuple[int, list[tuple[list[float], list[float]]]]]
+    recipe_colors: list[tuple[int, tuple[int, int, int]]]
     layers: list[SubWindowCfg]
 
 
@@ -66,6 +67,9 @@ class ProdectionLineWindow:
         self.items = {
             dsp_items[iid]: rc for iid, rc in self.cfg["nodes"]
         }
+        rcp_colors = {
+            rid: rgb for rid, rgb in self.cfg["recipe_colors"]
+        }
         with dpg.window(label = "Prodection Line", tag = self.tag): 
             with dpg.menu_bar(): 
                 with dpg.menu(label = "产线"): 
@@ -78,7 +82,10 @@ class ProdectionLineWindow:
                 with  dpg.draw_node() as self.recipe_node: 
                     self.dpg_recipes = {
                         dsp_recipes[rid]: DPGRecipe(
-                            xys, 2, visible = False, head_extend = self.layout.cfg.icon_size / 2
+                            xys, 3, 
+                            visible = False, 
+                            head_extend = self.layout.cfg.icon_size / 2, 
+                            color = rcp_colors[rid]
                         ) for rid, xys in self.cfg["recipes"]
                     }
                 with dpg.draw_node() as self.item_node: 

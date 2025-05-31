@@ -6,6 +6,7 @@ class DPGConnection:
     def __init__(self, 
             xys: tuple[list[float], list[float]], 
             width: int, 
+            color: tuple[int, int, int], 
             parent: int | str = 0, 
             head_extend: float = 0., 
         ) -> None:
@@ -23,7 +24,7 @@ class DPGConnection:
             dpg.draw_line(
                 p1, p2, 
                 thickness = width, 
-                color = (0, 0, 0), 
+                color = color, 
                 parent = parent
             ) for p1, p2 in zip(self.xys[:-1], self.xys[1:])
         ]
@@ -32,13 +33,14 @@ class DPGRecipe:
     def __init__(self, 
             xys: list[tuple[list[float], list[float]]], 
             width: int, 
+            color: tuple[int, int, int], 
             parent: int | str = 0, 
             visible: bool = True, 
             head_extend: float = 0., 
         ) -> None: 
         with dpg.draw_node(parent = parent, show = visible) as self.tag: 
             self.connections = [
-                DPGConnection(xy, width, self.tag, head_extend = head_extend)
+                DPGConnection(xy, width, color, head_extend = head_extend)
                 for xy in xys
             ]
     
