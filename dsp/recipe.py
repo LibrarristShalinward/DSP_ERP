@@ -62,8 +62,8 @@ class Recipe:
         self.time = time
         self.icon = icon
     
-    @classmethod
-    def from_dict(self, dt: dict[str, str]): 
+    @staticmethod
+    def from_dict(dt: dict[str, str]): 
         return Recipe(
             int(dt["ID"]), 
             RecipeType(int(dt["Type"])), 
