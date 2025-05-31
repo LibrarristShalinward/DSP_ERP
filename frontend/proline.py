@@ -9,7 +9,6 @@ import json
 class ScaleCfg(TypedDict): 
     row: int
     col: int
-    col_idx_start: int
     inner_vcon_cap: int
     inner_hcon_cap: int
     outer_lcon_cap: int
@@ -61,7 +60,7 @@ class ProdectionLineWindow:
         ]
         self.items = [
             {
-                iid: (r, c + cfg["scale"]["col_idx_start"] + 2) for iid, (r, c) in cfg["alloc"]["node"]
+                iid: (r, c) for iid, (r, c) in cfg["alloc"]["node"]
             } for cfg in self.cfg
         ]
         self.item_pos: dict[Item, tuple[int, int]] = {
