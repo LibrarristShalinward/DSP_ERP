@@ -36,6 +36,12 @@ class ProdectionLineWindow:
         self.col = max(
             cfg["scale"]["col"] for cfg in self.cfg
         )
+        self.sub_tags = [
+            cfg["tag"] for cfg in self.cfg
+        ]
+        self.sub_include_items = [
+            {dsp_items[iid] for iid, _ in cfg["alloc"]["node"]} for cfg in self.cfg
+        ]
         self.items = [
             {
                 iid: (r, c + cfg["scale"]["col_idx_start"] + 2) for iid, (r, c) in cfg["alloc"]["node"]
@@ -50,12 +56,27 @@ class ProdectionLineWindow:
         self.hg, self.vg = 50., 50.
 
         with dpg.window(label = "Prodection Line", tag = self.tag): 
+            with dpg.menu_bar(): 
+                with dpg.menu(label = "产线"): 
+                    for i, tg in enumerate(self.sub_tags): 
+                        dpg.add_menu_item(
+                            label = tg, 
+                            callback = self.show_subfig(i)
+                        )
             with dpg.draw_node() as self.item_node: 
                 self.dpg_item_buttons = {
                     item: DPGItemButton(
                         item, 
                         (c * self.hg, r * self.vg), 
-                        30.
+                        30., 
+                        visible = False
                     )
                     for item, (r, c) in self.item_pos.items()
                 }
+        self.show_subfig(0)()
+    
+    def show_subfig(self, sub_idx: int): 
+        def setter(*_, **__): 
+            for item, button in self.dpg_item_buttons.items(): 
+                button.set_visible(item in self.sub_include_items[sub_idx])
+        return setter
