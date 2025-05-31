@@ -1,4 +1,5 @@
 from .policy.recipe import RecipePolicy
+from .policy.petro import PetroPolicy, Policy16
 from dsp import *
 from functools import cached_property
 
@@ -7,8 +8,10 @@ from functools import cached_property
 # region 配置项
 class ScalePlanConfig: 
     def __init__(self, 
-                recipe_policy: RecipePolicy = RecipePolicy(),
+                recipe_policy: RecipePolicy = RecipePolicy(), 
+                petro_policy: PetroPolicy = PetroPolicy(Policy16, Policy16), 
             ) -> None: 
+        self.pp = petro_policy
         self.rp = recipe_policy
 # endregion
 
@@ -97,7 +100,7 @@ class ScalePlan:
                 targets: dict[Item, float], 
                 config: ScalePlanConfig = ScalePlanConfig(), 
             ) -> None:
-        self.rp,  = config.rp, 
+        self.rp, self.pp = config.rp, config.pp
         self.tar = targets
     
     @cached_property
@@ -126,6 +129,7 @@ class ScalePlan:
         
         for it in self.reliances.keys():
             _get_rcp_scale_from_item(it)
+        pis, prs = self.pp(item_scale)
         
-        return item_scale, rcp_scale
+        return item_scale | pis, rcp_scale | prs
     # endregion
