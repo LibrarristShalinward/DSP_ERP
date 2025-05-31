@@ -14,7 +14,11 @@ class DPGItemButton:
         self.icon = dsp_icons[item]
         dp = .5 - rounding
         with dpg.draw_node(label = "icon_node", parent = parent) as self.tag: 
-            self.button = dpg.draw_rectangle((-.5, -.5), (.5, .5), fill = self.icon.color, rounding = rounding * size)
+            self.button = dpg.draw_rectangle(
+                (-.5, -.5), (.5, .5), 
+                color = self.icon.color, fill = self.icon.color, 
+                thickness = 0, rounding = rounding * size
+            )
             self.texture = dpg.draw_image(self.icon.tag,  (-dp, -dp), (dp, dp))
         dpg.apply_transform(
             self.tag, 
