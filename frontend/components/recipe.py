@@ -7,8 +7,11 @@ class DPGConnection:
             xys: tuple[list[float], list[float]], 
             width: int, 
             parent: int | str = 0, 
+            head_extend: float = 0., 
         ) -> None:
         xs, ys = xys
+        ys[0] -= head_extend
+        ys[-1] += head_extend
         self.xys: list[tuple[float, float]] = list(sum(
             zip(
                 zip(xs, ys[:-1]), 
@@ -16,12 +19,14 @@ class DPGConnection:
             ), 
             tuple()
         ))
-        self.tag = dpg.draw_polyline(
-            [list(i) for i in self.xys], 
-            thickness = width, 
-            color = (0, 0, 0), 
-            parent = parent
-        )
+        self.tags = [
+            dpg.draw_line(
+                p1, p2, 
+                thickness = width, 
+                color = (0, 0, 0), 
+                parent = parent
+            ) for p1, p2 in zip(self.xys[:-1], self.xys[1:])
+        ]
 
 class DPGRecipe: 
     def __init__(self, 
@@ -29,10 +34,11 @@ class DPGRecipe:
             width: int, 
             parent: int | str = 0, 
             visible: bool = True, 
+            head_extend: float = 0., 
         ) -> None: 
         with dpg.draw_node(parent = parent, show = visible) as self.tag: 
             self.connections = [
-                DPGConnection(xy, width, self.tag)
+                DPGConnection(xy, width, self.tag, head_extend = head_extend)
                 for xy in xys
             ]
     

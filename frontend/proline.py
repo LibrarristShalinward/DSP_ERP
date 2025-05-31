@@ -78,7 +78,7 @@ class ProdectionLineWindow:
                 with  dpg.draw_node() as self.recipe_node: 
                     self.dpg_recipes = {
                         dsp_recipes[rid]: DPGRecipe(
-                            xys, 1, visible = False
+                            xys, 2, visible = False, head_extend = self.layout.cfg.icon_size / 2
                         ) for rid, xys in self.cfg["recipes"]
                     }
                 with dpg.draw_node() as self.item_node: 
