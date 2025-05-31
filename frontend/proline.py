@@ -1,9 +1,9 @@
+from .components import *
+from dsp import *
 from pathlib import Path
 from typing import TypedDict
 import dearpygui.dearpygui as dpg
 import json
-from .components import *
-from dsp import *
 
 class ScaleCfg(TypedDict): 
     row: int
@@ -54,7 +54,7 @@ class ProdectionLineWindow:
             ])
         }
         self.hg, self.vg = 50., 50.
-
+        self.fig_size = self.hg * self.col, self.vg * self.row
         with dpg.window(label = "Prodection Line", tag = self.tag): 
             with dpg.menu_bar(): 
                 with dpg.menu(label = "产线"): 
@@ -63,17 +63,35 @@ class ProdectionLineWindow:
                             label = tg, 
                             callback = self.show_subfig(i)
                         )
-            with dpg.draw_node() as self.item_node: 
-                self.dpg_item_buttons = {
-                    item: DPGItemButton(
-                        item, 
-                        (c * self.hg, r * self.vg), 
-                        30., 
-                        visible = False
-                    )
-                    for item, (r, c) in self.item_pos.items()
-                }
+            with dpg.draw_node() as self.base_node: 
+                with dpg.draw_node() as self.item_node: 
+                    self.dpg_item_buttons = {
+                        item: DPGItemButton(
+                            item, 
+                            ((c + .5) * self.hg, (r + .5) * self.vg), 
+                            30., 
+                            visible = False
+                        )
+                        for item, (r, c) in self.item_pos.items()
+                    }
         self.show_subfig(0)()
+        # 获取当前窗口可显示区域的大小和左上角坐标
+    
+    def update_fig_position(self, *_, **__): 
+        actual_size = dpg.get_item_rect_size(self.tag)
+        vgap, hgap = 10., 10.
+        scale = min(
+            actual_size[0] / (self.fig_size[0] + hgap * 2), 
+            actual_size[1] / (self.fig_size[1] +  vgap * 2)
+        )
+        dpg.apply_transform(
+            self.base_node, 
+            dpg.create_translation_matrix((
+                (actual_size[0] - self.fig_size[0] * scale) / 2, 
+                vgap
+            )) * 
+            dpg.create_scale_matrix((scale, scale))
+        )
     
     def show_subfig(self, sub_idx: int): 
         def setter(*_, **__): 
