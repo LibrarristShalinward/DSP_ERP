@@ -84,9 +84,10 @@ class ProdectionLineWindow:
     def update_fig_position(self, *_, **__): 
         actual_size = dpg.get_item_rect_size(self.tag)
         vgap, hgap = 10., 10.
+        assert actual_size[0] > hgap * 2 and actual_size[1] > vgap * 2, "窗口太小"
         scale = min(
-            actual_size[0] / (self.fig_size[0] + hgap * 2), 
-            actual_size[1] / (self.fig_size[1] +  vgap * 2)
+            (actual_size[0] - hgap * 2) / self.fig_size[0], 
+            (actual_size[1] - vgap * 2) / self.fig_size[1]
         )
         dpg.apply_transform(
             self.base_node, 
