@@ -46,8 +46,8 @@ class Item:
         self.idx = idx
         self.icon = icon
 
-    @classmethod
-    def from_dict(self, dt: dict[str, str]): 
+    @staticmethod
+    def from_dict(dt: dict[str, str]): 
         gidxn = int(dt["GridIndex"])
         return Item(
             int(dt["ID"]), 

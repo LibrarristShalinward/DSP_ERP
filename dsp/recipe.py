@@ -49,8 +49,8 @@ class Recipe:
                 id: int, 
                 rtype: RecipeType, 
                 name: str, 
-                items: dict[Item, int], 
-                results: dict[Item, int], 
+                items: dict[Item, float], 
+                results: dict[Item, float], 
                 time: float, 
                 icon: str
             ):
@@ -62,32 +62,34 @@ class Recipe:
         self.time = time
         self.icon = icon
     
-    @classmethod
-    def from_dict(self, dt: dict[str, str]): 
+    @staticmethod
+    def from_dict(dt: dict[str, str]): 
         return Recipe(
             int(dt["ID"]), 
             RecipeType(int(dt["Type"])), 
             dt["Name"], 
-            dict(
-                zip(
+            {
+                i: float(j)
+                for i, j in zip(
                     [dsp_items[iid] for iid in dt["Items"]], 
                     dt["ItemCounts"]
                 )
-            ), 
-            dict(
-                zip(
+            }, 
+            {
+                i: float(j)
+                for i, j in zip(
                     [dsp_items[iid] for iid in dt["Results"]], 
                     dt["ResultCounts"]
                 )
-            ), 
-            dt["TimeSpend"], 
+            }, 
+            float(dt["TimeSpend"]), 
             dt["IconName"]
         )
     
     @staticmethod
-    def amount2str(amt: dict[Item, int]): 
+    def amount2str(amt: dict[Item, float]): 
         return " + ".join(
-            f"{k.name}x{v}" for k, v in amt.items()
+            f"{k.name}x{int(v) if v >= 1. else "%.3f" %v}" for k, v in amt.items()
         )
     
     @property
