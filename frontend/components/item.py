@@ -13,12 +13,13 @@ class DPGItemButton:
                 visible: bool = True, 
             ) -> None:
         self.icon = dsp_icons[item]
+        self.rounding_base = rounding * size
         dp = .5 - rounding
         with dpg.draw_node(label = "icon_node", parent = parent, show = visible) as self.tag: 
             self.button = dpg.draw_rectangle(
                 (-.5, -.5), (.5, .5), 
                 color = self.icon.color, fill = self.icon.color, 
-                thickness = 0, rounding = rounding * size
+                thickness = 0, rounding = self.rounding_base
             )
             self.texture = dpg.draw_image(self.icon.tag,  (-dp, -dp), (dp, dp))
         dpg.apply_transform(
@@ -28,3 +29,6 @@ class DPGItemButton:
     
     def set_visible(self, visible: bool): 
         dpg.configure_item(self.tag, show = visible)
+    
+    def set_scale(self, scale: float = 1.): 
+        dpg.configure_item(self.button, rounding = self.rounding_base * scale)

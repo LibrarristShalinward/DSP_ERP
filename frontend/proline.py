@@ -108,6 +108,8 @@ class ProdectionLineWindow:
             )) * 
             dpg.create_scale_matrix((scale, scale))
         )
+        for button in self.dpg_item_buttons.values(): 
+            button.set_scale(scale)
     
     def show_subfig(self, sub_idx: int): 
         def setter(*_, **__): 
