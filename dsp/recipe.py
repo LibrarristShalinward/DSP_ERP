@@ -122,3 +122,17 @@ dsp_recipes = {
         key = lambda it: it.id
     )
 }
+
+dsp_recipes_basic = {
+    rid: rcp
+    for rid, rcp in dsp_recipes.items()
+    if
+        set(rcp.items.keys()) != set(rcp.results.keys()) and
+        (
+            rid <= 160 or
+            (
+                rid >= 11000 and
+                rid <= 11031
+            )
+        )
+}
