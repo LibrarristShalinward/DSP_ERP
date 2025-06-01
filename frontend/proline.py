@@ -124,9 +124,12 @@ class ProdectionLineWindow:
     def show_subfig(self, sub_idx: int): 
         def setter(*_, **__): 
             recipes = self.focus_recipes & self.sub_include_rcps[sub_idx]
-            itms = self.focus_items & self.sub_include_items[sub_idx] & set.union(*[
-                set(rcp.items.keys()) | set(rcp.results.keys()) for rcp in recipes
-            ])
+            if recipes: 
+                itms = self.focus_items & self.sub_include_items[sub_idx] & set.union(*[
+                    set(rcp.items.keys()) | set(rcp.results.keys()) for rcp in recipes
+                ])
+            else: 
+                itms = self.focus_items & set()
             for item, button in self.dpg_item_buttons.items(): 
                 button.set_visible(item in itms)
             for recipe, cons in self.dpg_recipes.items(): 
