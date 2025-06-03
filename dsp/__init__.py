@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+HOME = Path(__file__).parent.parent
 
 import json
 dsp_folder = os.path.dirname(__file__)

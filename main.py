@@ -16,7 +16,7 @@ item_scale, rcp_scale = sp.scales
 used_items, used_rcps = set(item_scale.keys()), set(rcp_scale.keys())
 # endregion
 
-font_path = r"C:\Users\LibrarristShalinward\AppData\Local\Microsoft\Windows\Fonts\MapleMono-NF-CN-Regular.ttf"
+font_path = str(HOME / r"resources/font.ttf")
 
 # 加载字体（需要确保路径有效）
 with dpg.font_registry():
