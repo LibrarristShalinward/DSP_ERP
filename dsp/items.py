@@ -1,8 +1,8 @@
-from . import dsp_folder, factory
+from . import factory, HOME
 from enum import Enum
 import os
 
-icon_folder = os.path.join(dsp_folder, r"resources/icon")
+icon_folder = HOME / r"resources/icon"
 assert os.path.exists(icon_folder)
 
 
@@ -54,9 +54,8 @@ class Item:
             ItemType(int(dt["Type"])), 
             dt["Name"], 
             (gidxn // 100, gidxn % 100), 
-            os.path.join(
-                icon_folder, 
-                dt["IconName"] + r".png"
+            str(
+                icon_folder / f"{dt["IconName"]}.png"
             )
         )
     

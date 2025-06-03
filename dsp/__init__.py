@@ -1,14 +1,9 @@
-import os
 from pathlib import Path
+import json
 HOME = Path(__file__).parent.parent
 
-import json
-dsp_folder = os.path.dirname(__file__)
 with open(
-        os.path.join(
-            dsp_folder, 
-            r"resources/FractionateEverything.json"
-        ), 
+        str(HOME / r"resources/FractionateEverything.json"), 
         "r", 
         encoding = "utf-8"
     ) as f: 
