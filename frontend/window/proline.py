@@ -1,5 +1,5 @@
-from .components import *
-from .layout import *
+from ..components import *
+from ..layout import *
 from dsp import *
 from pathlib import Path
 from typing import TypedDict

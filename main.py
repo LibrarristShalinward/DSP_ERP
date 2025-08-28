@@ -1,6 +1,6 @@
 from backend.plan.scale import ScalePlan
 from dsp import *
-from frontend.proline import ProdectionLineWindow
+from frontend.window import ProdectionLineWindow
 import ctypes
 import dearpygui.dearpygui as dpg
 
